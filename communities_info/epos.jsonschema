@@ -1,0 +1,41 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "EPOS Metadata",
+    "description": "This is the blueprint of the metadata block specific for the EPOS community",
+    "type": "object",
+    "properties": {
+        "lat_min": {
+            "title": "Latitude Min",
+            "description": "Minimum latitude of the dataset",
+            "type": "string"
+        },
+        "lon_min": {
+            "title": "Longitude Min",
+            "description": "Minimum longitude of the dataset",
+            "type": "string"
+        },
+        "lat_max": {
+            "title": "Latitude Max",
+            "description": "Maximum latitude of the dataset",
+            "type": "string"
+        },
+        "lon_max": {
+            "title": "Longitude Max",
+            "description": "Maximum longitude of the dataset",
+            "type": "string"
+        },
+        "start_time": {
+            "title": "Start Time",
+            "description": "The starting date-time for the dataset",
+            "type": "string",
+            "format": "date-time"
+        },
+        "stop_time": {
+            "title": "Stop Time",
+            "description": "The ending date-time for the dataset",
+            "type": "string",
+            "format": "date-time"
+        }
+    },
+    "additionalProperties": false
+}
