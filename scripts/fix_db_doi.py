@@ -4,22 +4,23 @@ import psycopg2
 from invenio_pidstore.providers.datacite import DataCiteProvider
 from b2share.modules.records.serializers import datacite_v31
 
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print('This script fixes DOI naming errors in a b2share database', sys.argv[0])
-    print('    Usage: {} username password databasename'.format(sys.argv[0]))
+    print('    Usage: {} username password hostname databasename'.format(sys.argv[0]))
     sys.exit(1)
 
 user = sys.argv[1]
 password = sys.argv[2]
-dbname = sys.argv[3]
+host = sys.argv[3]
+dbname = sys.argv[4]
 
 bad_doi_prefix = '10.5072/b2share.'
 good_doi_prefix = '10.23728/b2share.'
 
 
 def fix_doi_in_pids():
-    conn = psycopg2.connect("dbname='{}' user='{}' host='localhost' password={}"
-                            .format(dbname, user, password))
+    conn = psycopg2.connect("user='{}' password={} host='{}' dbname='{}'"
+                            .format(user, password, host, dbname))
     cursor = conn.cursor()
     cursor.execute("""SELECT id, pid_type, pid_value from pidstore_pid""")
     rows = cursor.fetchall()
@@ -40,8 +41,8 @@ def fix_doi_in_pids():
 
 
 def fix_doi_in_records():
-    conn = psycopg2.connect("dbname='{}' user='{}' host='localhost' password={}"
-                            .format(dbname, user, password))
+    conn = psycopg2.connect("user='{}' password={} host='{}' dbname='{}'"
+                            .format(user, password, host, dbname))
     cursor = conn.cursor()
     cursor.execute("""SELECT id, json, version_id from records_metadata""")
     rows = cursor.fetchall()
