@@ -1,7 +1,7 @@
 version: '2'
 services:
     b2share:
-        image: eudatb2share/b2share:2.0.0
+        image: eudatb2share/b2share:2.0.2rc1
         environment:
             - "B2ACCESS_CONSUMER_KEY=${B2ACCESS_CONSUMER_KEY}"
             - "B2ACCESS_SECRET_KEY=${B2ACCESS_SECRET_KEY}"
@@ -11,12 +11,13 @@ services:
             - "B2SHARE_CACHE_REDIS_HOST='redis'"
             - "B2SHARE_CACHE_REDIS_URL='redis://redis:6379/0'"
             - "B2SHARE_ACCOUNTS_SESSION_REDIS_URL='redis://redis:6379/1'"
-            - "B2SHARE_BROKER_URL='amqp://guest:guest@mq:5672//'"
+            - "B2SHARE_BROKER_URL='amqp://${B2SHARE_RABBITMQ_USER}:${B2SHARE_RABBITMQ_PASS}@mq:5672/'"
+            - "B2SHARE_CELERY_BROKER_URL='amqp://${B2SHARE_RABBITMQ_USER}:${B2SHARE_RABBITMQ_PASS}@mq:5672/'"
             - "B2SHARE_CELERY_RESULT_BACKEND='redis://redis:6379/2'"
             - "B2SHARE_SEARCH_ELASTIC_HOSTS='elasticsearch'"
         volumes:
             - "${B2SHARE_DATADIR}/b2share-data:/usr/var/b2share-instance"
-        ports:
+        expose:
             - "5000"
         links:
             - elasticsearch
@@ -24,7 +25,7 @@ services:
 
     elasticsearch:
         build: elasticsearch
-        ports:
+        expose:
             - "9200"
             - "9300"
         volumes:
@@ -32,7 +33,7 @@ services:
 
     redis:
         image: redis:3.2
-        ports:
+        expose:
             - "6379"
         volumes:
             - "${B2SHARE_DATADIR}/redis-data:/data"
@@ -42,21 +43,18 @@ services:
         ports:
             - "80:80"
             - "443:443"
-        volumes:
-            - "${B2SHARE_DATADIR}/nginx-data/ssl:/etc/ssl/"
         links:
             - b2share
 
     mq:
+        hostname: b2share-redis
         image: rabbitmq:3.6-management
         restart: "always"
-        ports:
+        environment:
+            - "RABBITMQ_DEFAULT_USER=${B2SHARE_RABBITMQ_USER}"
+            - "RABBITMQ_DEFAULT_PASS=${B2SHARE_RABBITMQ_PASS}"
+        expose:
             - "15672"
             - "5672"
-        read_only: true
         volumes:
             - "${B2SHARE_DATADIR}/rabbitmq-data:/var/lib/rabbitmq"
-        entrypoint:
-            - "rabbitmq-server"
-            - "--hostname"
-            - "b2share-redis"
